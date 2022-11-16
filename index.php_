@@ -1,0 +1,775 @@
+<?php
+	require_once("ajax/control.php");
+	require_once("ajax/mysql.php");
+	conexion();
+/*	if(isset($_GET['semana'])){
+		$semana = $_GET['sem'];
+	}else{
+		$semana = 1;	
+	}*/
+	$diasSemana = array(1=>'Lunes',
+						2=>'Martes',
+						3=>'Miercoles',
+						4=>'Jueves',
+						5=>'Viernes',
+						6=>'Sabado',
+						7=>'Domingo');
+/*	if(isset($_GET['semana'])){
+		$dia = $_GET['dia'];
+	}else{
+		$dia = 1;	
+	}*/
+	$ultimo = 0;
+	$query = "SELECT MAX(id) as ultimo FROM usuario_reto WHERE idusuario='".$_SESSION['userid']."'";
+	$sql = mysql_query($query);
+	while($row = mysql_fetch_array($sql)){
+		$ultimo = $row['ultimo'];
+	}
+	
+	$reto = 0;
+	if($ultimo>0){
+		$query = "SELECT * FROM usuario_reto WHERE id='".$ultimo."'";
+		$sql = mysql_query($query);
+		while($row = mysql_fetch_array($sql)){
+			if($row['semana']==7 && $row['dia']==7){
+				$semanasTotal = $row['semana'];
+				$semana = 7;
+				$dia = 7;
+			}else{
+				if($row['dia']==7){
+					$semanasTotal = $row['semana']+1;
+					$semana = $row['semana']+1;
+					$dia = 1;
+				}else{
+					$semanasTotal = $row['semana'];
+					$semana = $row['semana'];
+					$dia = $row['dia']+1;	
+				}
+					
+			}
+		}
+	}else{
+		$semanasTotal = 1;
+		$semana = 1;
+		$dia = 1;
+	}
+	if(isset($_GET['semana'])){
+		$semana = $_GET['semana'];
+		$dia = 1;
+	}
+	
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>7SM - Siete Semanas en Movimiento</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600"
+        rel="stylesheet">
+<link href="css/font-awesome.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+<link href="css/pages/dashboard.css" rel="stylesheet">
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container"> <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"><span
+                    class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span> </a><a class="brand" href="index.html"><i class="icon-user-md"></i>&nbsp;Fundaci&oacute;n Sin Obesidad M&eacute;xico A.C. </a>
+      <div class="nav-collapse">
+        <ul class="nav pull-right">
+          <!--<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i
+                            class="icon-cog"></i> Account <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="javascript:;">Settings</a></li>
+              <li><a href="javascript:;">Help</a></li>
+            </ul>
+          </li>-->
+          <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i
+                            class="icon-user"></i> <?php echo $_SESSION['username']; ?> <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <!--<li><a href="javascript:;">Profile</a></li>-->
+              <li><a href="ajax/control.php?closeSesion=y">Cerrar sesi&oacute;n</a></li>
+            </ul>
+          </li>
+        </ul>
+        <!--<form class="navbar-search pull-right">
+          <input type="text" class="search-query" placeholder="Search">
+        </form>-->
+      </div>
+      <!--/.nav-collapse --> 
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /navbar-inner --> 
+</div>
+<!-- /navbar -->
+<div class="subnavbar">
+  <div class="subnavbar-inner">
+    <div class="container">
+      <ul class="mainnav">
+   	<?php
+   		if($_SESSION['usertype']!='ADMINISTRADOR'){
+   	?>
+        <li class="active"><a href="index.php"><i class="icon-flag"></i><span>Reto 7SM</span> </a> </li>
+        <li><a href="cuenta.php"><i class="icon-user"></i><span>Cuenta</span> </a></li>
+        <li><a href="suscripcion.php"><i class="icon-money"></i><span>Donaci&oacute;n</span> </a> </li>
+	<?php
+        }else{
+    ?>
+    	<li><a href="historial.php"><i class="icon-folder-open-alt"></i><span>Historiales</span> </a> </li>
+        <li><a href="reportes.php"><i class="icon-list-alt"></i><span>Reportes</span> </a> </li>
+        <li><a href="usuarios.php"><i class="icon-user"></i><span>Usuarios</span> </a> </li>
+    <?php
+		}
+	?>
+        <!--<li class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"> <i class="icon-long-arrow-down"></i><span>Drops</span> <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="icons.html">Icons</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="pricing.html">Pricing Plans</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="signup.html">Signup</a></li>
+            <li><a href="error.html">404</a></li>
+          </ul>
+        </li>-->
+      </ul>
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /subnavbar-inner --> 
+</div>
+<!-- /subnavbar -->
+<div class="main">
+  <div class="main-inner">
+    <div class="container">
+      <div class="row">
+        <div class="span12">
+          <div class="widget widget-nopad">
+          	<div class="form-actions" style="text-align:right; margin-top:0px; margin-bottom:0px; padding:5px">
+            	<table align="left" cellpadding="0" cellspacing="0">
+                	<tr>
+                    	<td align="left">
+                            <div class="shortcuts"> 
+                            <?php
+								for($i=1;$i<=$semanasTotal;$i++){
+									if($i==$semana){
+							?>
+                                <a class="shortcut" style="padding:10px 20px 10px 20px; background:#F00"><span class="shortcut-label" style="color:#FFF">SEMANA<br></span><span class="shortcut-label" style="font-size:1.5em;color:#FFF"><?php echo $i; ?></span></a>&nbsp;
+                            <?php
+									}else{
+							?>
+                            	<a href="index.php?semana=<?php echo $i; ?>" class="shortcut" style="padding:10px 20px 10px 20px"><span class="shortcut-label">SEMANA<br></span><span class="shortcut-label" style="font-size:1.5em"><?php echo $i; ?></span></a>&nbsp;
+							<?php	
+									}
+								}
+							?>
+                            </div>
+                      	</td>
+                   	</tr>
+              	</table>
+            </div>
+            <!-- /widget-header -->
+            <ul class="nav nav-tabs">
+            <?php
+				foreach($diasSemana as $indice=>$valor){
+					if($indice==$dia){				
+			?>
+                <li class="active"><a data-toggle="tab" href="#<?php echo $valor; ?>"><?php echo $valor; ?></a></li>
+            <?php
+					}else{
+			?>
+                <li><a data-toggle="tab" href="#<?php echo $valor; ?>"><?php echo $valor; ?></a></li>
+            <?php
+					}
+				}
+			?>
+            </ul>
+            
+            <div class="tab-content">
+            <?php
+				foreach($diasSemana as $indice=>$valor){
+					if($indice==$dia){				
+			?>
+                <div id="<?php echo $valor; ?>" class="tab-pane fade in active">
+            <?php
+					}else{
+			?>
+				<div id="<?php echo $valor; ?>" class="tab-pane fade">			
+			<?php			
+					}
+			?>
+                	<div style="padding:10px; background:#FFF">
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                        	<tr>
+                            	<td width="50%" style="background:#E4F1E9" valign="top">                                
+                                    <div class="widget-header"> <i class="icon-bolt"></i>
+                                      <h3> Actividad F&iacute;sica</h3>
+                                    </div>
+                                    <div style="padding:20px">
+                                	<table width="100%">
+                                    
+							<?php
+                               
+                                $query = "SELECT 	*
+                                          FROM 		actividades
+                                          WHERE 	semana=".$semana." 
+                                          AND 		dia=".$indice." 
+                                          AND 		status=1 
+										  AND 		equipo LIKE '%".$_SESSION['equipo']."%'";
+                                $sql = mysql_query($query);
+                                $n=0;
+                                while($row = mysql_fetch_array($sql)){
+                                    //if($n==0){
+                            ?>
+                                    	<tr>
+                                        	<td width="50%" rowspan="4">
+                                                <div id="lunEjercicioImg" style="text-align:center"><img src="<?php echo $row['imagen']; ?>"></div>
+                                            	<div id="lunEjercicio" style="text-align:center; padding-top:20px; padding-bottom:20px"><h1><?php echo $row['descripcion']; ?></h1></div>
+                                            </td>
+                                            <td>
+                                            	<table width="100%" cellpadding="0" cellspacing="0">
+                                                	<tr>
+                                                    	<td width="50%">
+                                                        	<div id="lunEjercicioImgH" style="text-align:center"><img src="./recursos/reloj.png" style="max-width:80px"></div>
+                                                       	</td>
+                                                        <td width="50%">
+                                                        	<div id="lunEjercicioTxtH" style="text-align:center; padding-top:20px; padding-bottom:20px"><h3>HORARIO<br/><?php echo $row['horario']; ?></h3></div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td>
+                                            	<table width="100%" cellpadding="0" cellspacing="0">
+                                                	<tr>
+                                                    	<td width="50%">
+                                                        	<div style="text-align:center"><img src="./recursos/crono.png" style="max-width:80px"></div>
+                                                       	</td>
+                                                        <td width="50%">
+                                                        	<div style="text-align:center; padding-top:20px; padding-bottom:20px"><h3>DURACION<br/><?php echo $row['duracion']; ?></h3></div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td>
+                                            	<table width="100%" cellpadding="0" cellspacing="0">
+                                                	<tr>
+                                                    	<td width="50%">
+                                                        	<div style="text-align:center"><img src="./recursos/pulmon.png" style="max-width:80px"></div>
+                                                       	</td>
+                                                        <td width="50%">
+                                                        	<div style="text-align:center; padding-top:20px; padding-bottom:20px"><h3>INTENSIDAD<br/><?php echo $row['intensidad']; ?> VO<sub>2</sub> MAX</h3></div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td>
+                                            	<table width="100%" cellpadding="0" cellspacing="0">
+                                                	<tr>
+                                                    	<td width="50%">
+                                                        	<div style="text-align:center"><img src="./recursos/cardio.png" style="max-width:80px"></div>
+                                                       	</td>
+                                                        <td width="50%">
+                                                        	<div style="text-align:center; padding-top:20px; padding-bottom:20px"><h3>FREC. CARDIACA<br/><?php echo $row['cardio']; ?></h3></div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                            <?php
+									//}
+								}
+							?>                                       
+                              
+                                    </table>
+                                    </div>
+                                </td>
+                                <td width="50%" style="background:#CCC" valign="top">                                
+                                    <div class="widget-header"> <i class="icon-food"></i>
+                                      <h3> Dieta</h3>
+                                    </div>
+                                	<div class="panel-group" id="accordion">
+							<?php
+                                
+                                $query = "SELECT 	*
+                                          FROM 		dietas
+                                          WHERE 	dia=".$indice." 
+                                          AND 		status=1 
+										  AND 		equipo LIKE '%".$_SESSION['equipo']."%'
+										  ORDER BY 	id";
+                                $sql = mysql_query($query);
+                                $n=0;
+                                while($row = mysql_fetch_array($sql)){
+                            ?>                                    
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                          <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td>
+                                                  <h4 class="panel-title">
+                                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse<?php echo $row['id']; ?>">
+                                                    <?php echo $row['descripcion']; ?></a>
+                                                  </h4>
+                                                </td>
+                                                <td align="right">
+                                                    <b><?php echo $row['horario']; ?></b>
+                                                </td>
+                                            </tr>
+                                          </table>
+                                        </div>
+                                        <div id="collapse<?php echo $row['id']; ?>" class="panel-collapse collapse">
+                                        	<div class="panel-body"><?php echo $row['sugerencia']; ?></div>
+                                        </div>
+                                    </div>
+                            <?php
+									$n++;
+								}
+                            ?>                                    
+                                </td>
+                            </tr>
+                        </table>
+                   	</div>
+                    <div class="widget-header"> <i class="icon-check"></i>
+                      <h3> Registro de Peso Actual</h3>
+                    </div>
+                    <div class="widget-content" style="padding:10px">
+                    	<?php
+							$query2 = "SELECT id FROM retos WHERE equipo='".$_SESSION['equipo']."' AND semana=".$semana." AND dia=".$indice;
+							$sql2 = mysql_query($query2);
+							while($row2 = mysql_fetch_array($sql2)){
+								$reto = $row2['id']; 
+							}
+							
+							$pesoactual = 0;
+							$pesobajado = 0;
+							$query = "SELECT * FROM usuario_reto WHERE idusuario='".$_SESSION['userid']."' AND semana=".$semana." AND dia=".$indice;
+							$sql = mysql_query($query);
+							while($row = mysql_fetch_array($sql)){
+								$pesoactual = $row['peso'];
+								$pesobajado = $row['bajado'];
+							}
+						?>
+                    	<table width="100%">
+                            <tr>
+                                <td>
+                                    Peso Inicial<br/>
+                                    <input type="text" id="<?php echo $valor; ?>pesoini" style="width:92%" readonly value="<?php echo $_SESSION['peso']; ?>" />
+                                </td>
+                                <td>
+                                    Peso Actual<br/>
+                                    <input type="text" id="<?php echo $valor; ?>pesoact" value="<?php echo $pesoactual; ?>" style="width:92%" onKeyUp="calculaBajado('<?php echo $valor; ?>')" />
+                                </td>
+                                <td>
+                                    Peso Bajado<br/>
+                                    <input type="text" id="<?php echo $valor; ?>pesobaj" value="<?php echo $pesobajado; ?>" style="width:92%" readonly />
+                                </td>
+                            </tr>
+                            <tr>
+                            	<td colspan="3" align="center"><input type="button" value="Registrar Peso" style="background:#063; color:#FFF; padding: 10px" onClick="registra('<?php echo $semana; ?>','<?php echo $valor; ?>','<?php echo $reto; ?>')"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+         	<?php
+				}
+			?>
+                
+            </div>
+          
+          <!-- /widget -->
+        </div>
+        <!-- /span6 -->
+      </div>
+      <!-- /row --> 
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /main-inner --> 
+</div>
+<!-- /main  -->
+<div class="footer">
+  <div class="footer-inner">
+    <div class="container">
+      <div class="row">
+        <div class="span12"> &copy; 2015 Sistema de Control de Medicina Est&eacute;tica. <a href="http://www.xiontecnologias.com/">Creado por XION Tecnologias</a></div>
+        <!-- /span12 --> 
+      </div>
+      <!-- /row --> 
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /footer-inner --> 
+</div>
+<!-- /footer --> 
+<!-- Le javascript
+================================================== --> 
+<!-- Placed at the end of the document so the pages load faster --> 
+<script src="js/jquery-1.7.2.min.js"></script> 
+<script src="js/bootstrap.js"></script> 
+<script src="js/jquery-ui.js"></script>
+<script type="text/javascript">
+	
+	$(document).ready(function(e) {
+		$.datepicker.regional['es'] = {
+			closeText: 'Cerrar',
+			currentText: 'Hoy',
+			monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+			monthNamesShort: ['Enero','Febrero','Marzo','Abril', 'Mayo','Junio','Julio','Agosto','Septiembre', 'Octubre','Noviembre','Diciembre'],
+			dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+			dayNamesShort: ['Dom','Lun','Mar','Mié','Juv','Vie','Sáb'],
+			dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','Sá'],
+			weekHeader: 'Sm',
+			dateFormat: 'dd/mm/yy',
+			firstDay: 1,
+			isRTL: false,
+			showMonthAfterYear: false,
+			yearSuffix: ''};
+		$.datepicker.setDefaults($.datepicker.regional['es']);
+		/*$("#ultimoexamenfisico").datepicker({
+			changeMonth: true,
+            changeYear: true,
+			showButtonPanel: true,
+			yearRange: '1930:+0'
+		});
+		$("#ultimaradiografia").datepicker({
+			changeMonth: true,
+            changeYear: true,
+			showButtonPanel: true,
+			yearRange: '1930:+0'
+		});
+		$("#ultimoelectrocardiograma").datepicker({
+			changeMonth: true,
+            changeYear: true,
+			showButtonPanel: true,
+			yearRange: '1930:+0'
+		});*/
+    });
+	
+	function $_GET(param){
+		url = document.URL;
+		url = String(url.match(/\?+.+/));
+		url = url.replace("?", "");
+		url = url.split("&");
+		x = 0;
+		while (x < url.length){
+			p = url[x].split("=");
+			if (p[0] == param){
+				return decodeURIComponent(p[1]);
+			}
+			x++;
+		}
+	}
+	
+	function checaGET(){
+		var v = $_GET("v");
+		if(v=="outview"){
+			cargarExpediente();
+		}
+	}
+	
+	function formatearFecha(fecha){
+		fec = fecha.split("-");
+		return fec[2]+"/"+fec[1]+"/"+fec[0];	
+	}
+	
+	function obtenerFolio(){
+		$.post("ajax/ajaxingreso.php?op=obtenerFolio", "", function(resp){
+			$("#folio").html(resp);
+		});
+	}
+	
+	function calculaEdad(){
+		var pfecnac = $("#pfecnac").val();
+		$.post("ajax/ajaxingreso.php?op=calculaEdad", "pfecnac="+pfecnac, function(resp){
+			$("#pedad").val(resp);
+		});
+	}
+	
+	function calculaIMC(){
+		var peso = $("#peso").val();
+		var talla = $("#talla").val();
+		$.post("ajax/ajaxingreso.php?op=calculaIMC", "peso="+peso+"&talla="+talla, function(resp){
+			$("#imc").val(resp);
+		});
+	}
+	
+	function calculaBajado(dia){
+		var pesoini = $("#"+dia+"pesoini").val();
+		var pesoact = $("#"+dia+"pesoact").val();
+		var bajados = 0;
+		bajados = pesoini - pesoact;
+		$("#"+dia+"pesobaj").val(bajados);
+	}
+	
+	function registra(semana,dia,reto){
+		alert("ENTRA")
+		var pesoini = $("#"+dia+"pesoini").val();
+		var pesoact = $("#"+dia+"pesoact").val();
+		var pesobaj = $("#"+dia+"pesobaj").val();
+		$.post("ajax/ajaxhistorial.php?op=registrardia", "pesoact="+pesoact+"&pesobaj="+pesobaj+"&semana="+semana+"&dia="+dia+"&reto="+reto, function(resp){
+			alert(resp);
+			//document.location.reload();
+		});
+	}
+	
+	function comboDoctor(){
+		$.post("ajax/ajaxingreso.php?op=comboDoctor", "", function(resp){
+			$("#doctor").html(resp);
+		});
+	}
+	
+	function comboCirugia(){
+		$.post("ajax/ajaxingreso.php?op=comboCirugia", "", function(resp){
+			$("#cirugia").html(resp);
+		});
+	}
+	
+	function nuevo(){
+		obtenerFolio();
+		comboDoctor();
+		comboCirugia();
+		$("#fecIngreso").val('<?php echo date("d/m/Y"); ?>');
+		$("#doctor").val('');
+		$("#cirugia").val('');
+		$("#pnombre").val('');
+		$("#pfecnac").val('');
+		$("#pedad").val('');
+		$("#pedocivil").val('SOLTERA(O)');
+		$("#psexo").val('MUJER');
+		$("#pdomicilio").val('');
+		$("#ptelparticular").val('');
+		$("#pteltrabajo").val('');
+		$("#pcelular").val('');
+		$("#pemail").val('');
+		$("#pfacebook").val('');
+		$("#ptwitter").val('');
+		$("#rnombre").val('');
+		$("#rtelefono").val('');
+		$("#avisara").val('');
+		$("#avisartelefonos").val('');
+		$("#peso").val('');
+		$("#talla").val('');
+		$("#imc").val('');
+		$("#operyproc").val('');
+		$("#ultimoexamenfisico").val('');
+		$("#ultimaradiografia").val('');
+		$("#ultimoelectrocardiograma").val('');
+		$("input[name='anestesiaraquia']")[1].checked = true;
+		$("input[name='anestesialocal']")[1].checked = true;
+		$("input[name='anestesiageneral']")[1].checked = true;
+		$("input[name='anestesiareacciones']")[1].checked = true;
+		$("input[name='anestesiafiebre']")[1].checked = true;
+		$("input[name='usteddientespostizos']")[1].checked = true;
+		$("input[name='usteddientesflojos']")[1].checked = true;
+		$("input[name='ustedcubiertosporcelana']")[1].checked = true;
+		$("input[name='ustedabrirboca']")[1].checked = true;
+		$("input[name='ustedpestaniaspostizas']")[1].checked = true;
+		$("input[name='ustedlentescontacto']")[1].checked = true;
+		$("input[name='usteddefectosfisicos']")[1].checked = true;
+		$("input[name='medantidepresivos']")[1].checked = true;
+		$("#medantidepresivoscual").val('');
+		$("input[name='medantihipertensivos']")[1].checked = true;
+		$("#medantihipertensivoscual").val('');
+		$("input[name='medanticuagulantes']")[1].checked = true;
+		$("#medanticuagulantescual").val('');
+		$("#medanticuagulantesdosis").val('');
+		$("input[name='meddiabetes']")[1].checked = true;
+		$("#meddiabetescual").val('');
+		$("input[name='medotro']")[1].checked = true;
+		$("#medotrocual1").val('');
+		$("#medotrodosis1").val('');
+		$("#medotrocual2").val('');
+		$("#medotrodosis2").val('');
+	}
+	
+	function cargarExpediente(){
+		$.post("ajax/ajaxingreso.php?op=cargar", "", function(resp){
+			//alert(resp);
+			var row = eval('('+resp+')');
+			$("#fecIngreso").val(formatearFecha(row.fecha));
+			$("#folio").html(row.folio);
+			$("#doctor").val(row.nombre);
+			$("#cirugia").val(row.cirugia);
+			$("#pnombre").val(row.pnombre);
+			$("#pfecnac").val(formatearFecha(row.pfecnac));
+			$("#pedad").val(row.pedad);
+			//calculaEdad();
+			$("#pedocivil").val(row.pedocivil);
+			$("#psexo").val(row.psexo);
+			$("#pdomicilio").val(row.pdomicilio);
+			$("#ptelparticular").val(row.ptelparticular);
+			$("#pteltrabajo").val(row.pteltrabajo);
+			$("#pcelular").val(row.pcelular);
+			$("#pemail").val(row.pemail);
+			$("#pfacebook").val(row.pfacebook);
+			$("#ptwitter").val(row.ptwitter);
+			$("#rnombre").val(row.rnombre);
+			$("#rtelefono").val(row.rtelefono);
+			$("#avisara").val(row.avisara);
+			$("#avisartelefonos").val(row.avisartelefonos);
+			$("#peso").val(row.peso);
+			$("#talla").val(row.talla);
+			$("#imc").val(row.imc);
+			$("#operyproc").val(row.operyproc);
+			$("#ultimoexamenfisico").val(formatearFecha(row.ultimoexamenfisico));
+			$("#ultimaradiografia").val(formatearFecha(row.ultimaradiografia));
+			$("#ultimoelectrocardiograma").val(formatearFecha(row.ultimoelectrocardiograma));
+			$("input[name='anestesiaraquia']")[row.anestesiaraquia].checked = true;
+			$("input[name='anestesialocal']")[row.anestesialocal].checked = true;
+			$("input[name='anestesiageneral']")[row.anestesiageneral].checked = true;
+			$("input[name='anestesiareacciones']")[row.anestesiareacciones].checked = true;
+			$("input[name='anestesiafiebre']")[row.anestesiafiebre].checked = true;
+			$("input[name='usteddientespostizos']")[row.usteddientespostizos].checked = true;
+			$("input[name='usteddientesflojos']")[row.usteddientesflojos].checked = true;
+			$("input[name='ustedcubiertosporcelana']")[row.ustedcubiertosporcelana].checked = true;
+			$("input[name='ustedabrirboca']")[row.ustedabrirboca].checked = true;
+			$("input[name='ustedpestaniaspostizas']")[row.ustedpestaniaspostizas].checked = true;
+			$("input[name='ustedlentescontacto']")[row.ustedlentescontacto].checked = true;
+			$("input[name='usteddefectosfisicos']")[row.usteddefectosfisicos].checked = true;
+			$("input[name='medantidepresivos']")[row.medantidepresivos].checked = true;
+			$("#medantidepresivoscual").val(row.medantidepresivoscual);
+			$("input[name='medantihipertensivos']")[row.medantihipertensivos].checked = true;
+			$("#medantihipertensivoscual").val(row.medantihipertensivoscual);
+			$("input[name='medanticuagulantes']")[row.medanticuagulantes].checked = true;
+			$("#medanticuagulantescual").val(row.medanticuagulantescual);
+			$("#medanticuagulantesdosis").val(row.medanticuagulantesdosis);
+			$("input[name='meddiabetes']")[row.meddiabetes].checked = true;
+			$("#meddiabetescual").val(row.meddiabetescual);
+			$("input[name='medotro']")[row.medotro].checked = true;
+			$("#medotrocual1").val(row.medotrocual1);
+			$("#medotrodosis1").val(row.medotrodosis1);
+			$("#medotrocual2").val(row.medotrocual2);
+			$("#medotrodosis2").val(row.medotrodosis2);
+		});
+	}
+	
+	function eliminar(){
+		var folio = $("#folio").html();
+		if(confirm("¿Desea eliminar el expediente No."+folio+"?")){
+			var params = "folio="+folio;
+			$.post("ajax/ajaxingreso.php?op=eliminar", params, function(resp){
+				if(resp==1){
+					alert("El expediente se elimino exitosamente!");
+					nuevo();					
+				}
+				if(resp==0){
+					alert("Ocurrió un error, intente nuevamente. Si el problema persiste contacte a soporte");
+				}
+			});	
+		}
+	}
+	
+	function guardar(){
+		var campos = new Array('pnombre_txt');
+		var validacion = validar(campos);
+						
+		if(validacion == true){			
+			var params = "folio=" + $("#folio").html();
+			params+= "&fecha=" + $("#fecIngreso").val();
+			params+= "&doctor=" + $("#doctor").val();
+			params+= "&cirugia=" + $("#cirugia").val();
+			params+= "&pnombre=" + $("#pnombre").val();
+			params+= "&pfecnac=" + $("#pfecnac").val();
+			params+= "&pedad=" + $("#pedad").val();
+			params+= "&pedocivil=" + $("#pedocivil").val();
+			params+= "&psexo=" + $("#psexo").val();
+			params+= "&pdomicilio=" + $("#pdomicilio").val();
+			params+= "&ptelparticular=" + $("#ptelparticular").val();
+			params+= "&pteltrabajo=" + $("#pteltrabajo").val();
+			params+= "&pcelular=" + $("#pcelular").val();
+			params+= "&pemail=" + $("#pemail").val();
+			params+= "&pfacebook=" + $("#pfacebook").val();
+			params+= "&ptwitter=" + $("#ptwitter").val();
+			params+= "&rnombre=" + $("#rnombre").val();
+			params+= "&rtelefono=" + $("#rtelefono").val();
+			params+= "&avisara=" + $("#avisara").val();
+			params+= "&avisartelefonos=" + $("#avisartelefonos").val();
+			params+= "&peso=" + $("#peso").val();
+			params+= "&talla=" + $("#talla").val();
+			params+= "&imc=" + $("#imc").val();
+			params+= "&operyproc=" + $("#operyproc").val();
+			params+= "&ultimoexamenfisico=" + $("#ultimoexamenfisico").val();
+			params+= "&ultimaradiografia=" + $("#ultimaradiografia").val();
+			params+= "&ultimoelectrocardiograma=" + $("#ultimoelectrocardiograma").val();
+			params+= "&anestesiaraquia=" + $("input[name='anestesiaraquia']:checked").val();
+			params+= "&anestesialocal=" + $("input[name='anestesialocal']:checked").val();
+			params+= "&anestesiageneral=" + $("input[name='anestesiageneral']:checked").val();
+			params+= "&anestesiareacciones=" + $("input[name='anestesiareacciones']:checked").val();
+			params+= "&anestesiafiebre=" + $("input[name='anestesiafiebre']:checked").val();
+			params+= "&usteddientespostizos=" + $("input[name='usteddientespostizos']:checked").val();
+			params+= "&usteddientesflojos=" + $("input[name='usteddientesflojos']:checked").val();
+			params+= "&ustedcubiertosporcelana=" + $("input[name='ustedcubiertosporcelana']:checked").val();
+			params+= "&ustedabrirboca=" + $("input[name='ustedabrirboca']:checked").val();
+			params+= "&ustedpestaniaspostizas=" + $("input[name='ustedpestaniaspostizas']:checked").val();
+			params+= "&ustedlentescontacto=" + $("input[name='ustedlentescontacto']:checked").val();
+			params+= "&usteddefectosfisicos=" + $("input[name='usteddefectosfisicos']:checked").val();
+			params+= "&medantidepresivos=" + $("input[name='medantidepresivos']:checked").val();
+			params+= "&medantidepresivoscual=" + $("#medantidepresivoscual").val();
+			params+= "&medantihipertensivos=" + $("input[name='medantihipertensivos']:checked").val();
+			params+= "&medantihipertensivoscual=" + $("#medantihipertensivoscual").val();
+			params+= "&medanticuagulantes=" + $("input[name='medanticuagulantes']:checked").val();
+			params+= "&medanticuagulantescual=" + $("#medanticuagulantescual").val();
+			params+= "&medanticuagulantesdosis=" + $("#medanticuagulantesdosis").val();
+			params+= "&meddiabetes=" + $("input[name='meddiabetes']:checked").val();
+			params+= "&meddiabetescual=" + $("#meddiabetescual").val();
+			params+= "&medotro=" + $("input[name='medotro']:checked").val();
+			params+= "&medotrocual1=" + $("#medotrocual1").val();
+			params+= "&medotrodosis1=" + $("#medotrodosis1").val();
+			params+= "&medotrocual2=" + $("#medotrocual2").val();
+			params+= "&medotrodosis2=" + $("#medotrodosis2").val();
+			
+			$.post("ajax/ajaxingreso.php?op=guardar", params, function(resp){
+				//alert(resp);
+				if(resp>0){
+					alert("El registro se guardo exitosamente!");
+					imprimir();
+					nuevo();
+				}else
+					alert("Ocurrió un error, intente nuevamente. Si el problema persiste contacte a soporte");
+			});
+		}else{
+			alert("Llene los campos requeridos");
+		}
+	}
+	
+	function validar(campos){
+		var res = true;
+		for(a in campos){
+			var arr = campos[a].split("_");
+			//alert(arr[1]);
+			if(arr[1] == "txt"){
+				var campo = $("#"+arr[0]).val();
+				if(campo==""){
+					 $("#"+arr[0]).addClass('bordeRojo');
+					 res = false;
+				}else{
+					 $("#"+arr[0]).removeClass('bordeRojo');
+				}
+			}
+		}
+		return res;
+	}
+	
+	function imprimir(){
+		var folio = $("#folio").html();
+		window.open("impIngreso.php?folio="+folio,"_blank");
+		//alert("Ha ocurrido un problema con la configuracion de la impresion");	
+	}
+	
+</script>
+</body>
+</html>
